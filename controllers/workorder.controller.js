@@ -191,3 +191,11 @@ export const register = async (req, res, next) => {
     next(error);
   }
 };
+
+export const test = async (req, res, next) => {
+  try {
+    res.json({ message: "Test controller is working!" });
+  } catch (error) {
+    next(error);
+  }
+};
