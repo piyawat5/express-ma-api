@@ -1,0 +1,114 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL") 
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  firstName     String?
+  lastName      String?
+  avatar        String?
+  password  String?
+  role      UserRole @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  status    Boolean @default(true)
+
+AssignedWorkorders AssignedUser[]
+  // TODO:
+  // invalidEndDate
+  // invalidAmount
+}
+
+model AssignedUser {
+  id         String   @id @default(uuid())
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String
+  WorkorderItem WorkorderItem @relation(fields: [workorderItemId], references: [id])
+  workorderItemId String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Config {
+  id        String   @id @default(uuid())
+  type      ConfigType @default(TECHNICIAL)
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  technicials technicial[]
+}
+
+model Workorder {
+  id          String   @id @default(uuid())
+  title       String
+  status      String   @default("PENDING")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workorderItems WorkorderItem[]
+
+}
+
+model WorkorderItem {
+  id          String   @id @default(uuid())
+  assignedTo  AssignedUser[]
+  attachments AttachmentWorkorder[]
+  detail String?
+  startDate   DateTime?
+  endDate     DateTime?
+  workorder   Workorder @relation(fields: [workorderId], references: [id])
+  workorderId String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model AttachmentWorkorder {
+  id        String   @id @default(uuid())
+  url       String
+  WorkorderItem WorkorderItem @relation(fields: [workorderItemId], references: [id])
+  workorderItemId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+} 
+
+model technicial {
+  id        String   @id @default(uuid())
+  name      String
+  number    String
+  spareNumber String?
+  url String?
+  config    Config   @relation(fields: [configId], references: [id])
+  configId  String 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Status {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum ConfigType {
+  TECHNICIAL
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
