@@ -56,7 +56,7 @@ router.get("/technicial", getTechnicials);
 
 router.post("/auth/register", register);
 router.get("/test", test);
-router.get("/foo", getConfigs);
+router.get("/foo", test);
 
 // TODO: validate
 
