@@ -50,6 +50,7 @@ model Config {
   updatedAt DateTime @updatedAt
 
   technicials technicial[]
+  workorderItems WorkorderItem[]
 }
 
 model Workorder {
@@ -67,6 +68,8 @@ model WorkorderItem {
   id          String   @id @default(uuid())
   assignedTo  AssignedUser[]
   attachments AttachmentWorkorder[]
+  config      Config   @relation(fields: [configId], references: [id])
+  configId    String 
   detail String?
   startDate   DateTime?
   endDate     DateTime?
@@ -106,6 +109,7 @@ enum Status {
 
 enum ConfigType {
   TECHNICIAL
+  WorkorderType
 }
 
 enum UserRole {

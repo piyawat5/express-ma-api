@@ -34,25 +34,25 @@ import {
 const router = express.Router();
 
 // ------------- workorder --------------
-router.get("/workorder", getWorkorders);
-router.get("/workorder/:id", getWorkorderById);
 router.post("/workorder/create", createWorkorder);
 router.put("/workorder/update/:id", updateWorkorder);
 router.delete("/workorder/delete/:id", deleteWorkorder);
+router.get("/workorder/:id", getWorkorderById); //
+router.get("/workorder", getWorkorders);
 
 // ------------- config --------------
-router.get("/config", getConfigs);
-router.get("/config/:id", getConfigById);
 router.post("/config/create", createConfig);
 router.put("/config/update/:id", updateConfig);
 router.delete("/config/delete/:id", deleteConfig);
+router.get("/config/:id", getConfigById); //
+router.get("/config", getConfigs);
 
 // ------------- technicial --------------
-router.get("/technicial", getTechnicials);
-router.get("/technicial/:id", getTechnicialById);
 router.post("/technicial/create", createTechnicial);
 router.put("/technicial/update/:id", updateTechnicial);
 router.delete("/technicial/delete/:id", deleteTechnicial);
+router.get("/technicial/:id", getTechnicialById); //
+router.get("/technicial", getTechnicials);
 
 router.post("/auth/register", register);
 router.get("/test", test);
