@@ -153,6 +153,256 @@ export async function createWorkorder(req, res) {
   }
 }
 
+export async function getWorkorders(req, res) {
+  try {
+    const {
+      page = "1",
+      size = "10",
+      title,
+      status,
+      startDate,
+      endDate,
+      sortBy = "createdAt",
+      sortOrder = "desc",
+    } = req.query;
+
+    const pageNum = parseInt(page);
+    const sizeNum = parseInt(size);
+    const skip = (pageNum - 1) * sizeNum;
+
+    // Build filter conditions
+    const where = {};
+
+    if (title) {
+      where.title = {
+        contains: title,
+      };
+    }
+
+    if (status) {
+      where.status = status;
+    }
+
+    // Filter by workorderItems date range
+    if (startDate || endDate) {
+      where.workorderItems = {
+        some: {
+          ...(startDate && { startDate: { gte: new Date(startDate) } }),
+          ...(endDate && { endDate: { lte: new Date(endDate) } }),
+        },
+      };
+    }
+
+    // Get total count for pagination
+    const total = await prisma.workorder.count({ where });
+
+    // Get workorders with relations
+    const workorders = await prisma.workorder.findMany({
+      where,
+      include: {
+        workorderItems: {
+          include: {
+            assignedTo: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    email: true,
+                    firstName: true,
+                    lastName: true,
+                    avatar: true,
+                  },
+                },
+              },
+            },
+            attachments: true,
+          },
+        },
+      },
+      skip,
+      take: sizeNum,
+      orderBy: {
+        [sortBy]: sortOrder.toLowerCase() === "asc" ? "asc" : "desc",
+      },
+    });
+
+    return res.json({
+      success: true,
+      data: workorders,
+      pagination: {
+        page: pageNum,
+        size: sizeNum,
+        total,
+        totalPages: Math.ceil(total / sizeNum),
+      },
+    });
+  } catch (error) {
+    console.error("Get workorders error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "เกิดข้อผิดพลาดในการดึงข้อมูล workorder",
+    });
+  }
+}
+
+export const getWorkorderById = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const workorder = await prisma.workorder.findUnique({
+      where: { id },
+      include: {
+        workorderItems: {
+          include: {
+            assignedTo: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    email: true,
+                    firstName: true,
+                    lastName: true,
+                    avatar: true,
+                  },
+                },
+              },
+            },
+            attachments: true,
+          },
+        },
+      },
+    });
+
+    if (!workorder) {
+      return res.status(404).json({
+        success: false,
+        message: "ไม่พบ workorder",
+      });
+    }
+
+    return res.json({
+      success: true,
+      data: workorder,
+    });
+  } catch (error) {
+    console.error("Get workorder by id error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "เกิดข้อผิดพลาดในการดึงข้อมูล workorder",
+    });
+  }
+};
+
+export const updateWorkorder = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { title, status, workorderItems } = req.body;
+
+    // Check if workorder exists
+    const existingWorkorder = await prisma.workorder.findUnique({
+      where: { id },
+    });
+
+    if (!existingWorkorder) {
+      return res.status(404).json({
+        success: false,
+        message: "ไม่พบ workorder",
+      });
+    }
+
+    // Update workorder
+    const workorder = await prisma.workorder.update({
+      where: { id },
+      data: {
+        title,
+        status,
+        ...(workorderItems && {
+          workorderItems: {
+            deleteMany: {},
+            create: workorderItems.map((item) => ({
+              detail: item.detail,
+              startDate: item.startDate ? new Date(item.startDate) : null,
+              endDate: item.endDate ? new Date(item.endDate) : null,
+              ...(item.assignedTo && {
+                assignedTo: {
+                  create: item.assignedTo.map((userId) => ({
+                    userId,
+                  })),
+                },
+              }),
+              ...(item.attachments && {
+                attachments: {
+                  create: item.attachments.map((url) => ({
+                    url,
+                  })),
+                },
+              }),
+            })),
+          },
+        }),
+      },
+      include: {
+        workorderItems: {
+          include: {
+            assignedTo: {
+              include: {
+                user: true,
+              },
+            },
+            attachments: true,
+          },
+        },
+      },
+    });
+
+    return res.json({
+      success: true,
+      message: "อัพเดท workorder สำเร็จ",
+      data: workorder,
+    });
+  } catch (error) {
+    console.error("Update workorder error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "เกิดข้อผิดพลาดในการอัพเดท workorder",
+    });
+  }
+};
+
+export const deleteWorkorder = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    // Check if workorder exists
+    const existingWorkorder = await prisma.workorder.findUnique({
+      where: { id },
+    });
+
+    if (!existingWorkorder) {
+      return res.status(404).json({
+        success: false,
+        message: "ไม่พบ workorder",
+      });
+    }
+
+    // Delete workorder (cascade will handle related records)
+    await prisma.workorder.delete({
+      where: { id },
+    });
+
+    return res.json({
+      success: true,
+      message: "ลบ workorder สำเร็จ",
+    });
+  } catch (error) {
+    console.error("Delete workorder error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "เกิดข้อผิดพลาดในการลบ workorder",
+    });
+  }
+};
+
 export const register = async (req, res, next) => {
   try {
     /* 
