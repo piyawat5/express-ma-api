@@ -1,14 +1,66 @@
 import prisma from "../config/prisma.js";
+import { ConfigType } from "@prisma/client";
 import createError from "../utils/createError.js";
 
 export async function getConfigs(req, res) {
   try {
-    res.json({ message: "Hello World" });
+    const {
+      page = "1",
+      size = "10",
+      name,
+      type,
+      sortBy = "createdAt",
+      sortOrder = "desc",
+    } = req.query;
+
+    const pageNum = parseInt(page);
+    const sizeNum = parseInt(size);
+    const skip = (pageNum - 1) * sizeNum;
+
+    // Build filter conditions
+    const where = {};
+
+    if (name) {
+      where.name = {
+        contains: name,
+      };
+    }
+
+    if (type) {
+      where.type = type;
+    }
+
+    // Get total count for pagination
+    const total = await prisma.config.count({ where });
+
+    // Get configs with technicials relation
+    const configs = await prisma.config.findMany({
+      where,
+      include: {
+        technicials: true,
+      },
+      skip,
+      take: sizeNum,
+      orderBy: {
+        [sortBy]: sortOrder === "asc" ? "asc" : "desc",
+      },
+    });
+
+    return res.json({
+      success: true,
+      data: configs,
+      pagination: {
+        page: pageNum,
+        size: sizeNum,
+        total,
+        totalPages: Math.ceil(total / sizeNum),
+      },
+    });
   } catch (error) {
     console.error("Get configs error:", error);
     return res.status(500).json({
       success: false,
-      message: "เกิดข้อผิดพลาดในการดึงข้อมูล config" + error,
+      message: "เกิดข้อผิดพลาดในการดึงข้อมูล config",
     });
   }
 }
@@ -56,11 +108,18 @@ export async function createConfig(req, res, next) {
       });
     }
 
-    // Create config
+    // ตรวจสอบว่าค่า type ถูกต้องหรือไม่
+    if (!Object.values(ConfigType).includes(type)) {
+      return res.status(400).json({
+        success: false,
+        message: `type "${type}" ไม่ถูกต้อง (ต้องเป็น TECHNICIAL หรือ WORKORDERTYPE)`,
+      });
+    }
+
     const config = await prisma.config.create({
       data: {
         name,
-        type,
+        type: ConfigType[type], // ✅ แปลงจาก string เป็น enum
       },
       include: {
         technicials: true,
@@ -77,7 +136,7 @@ export async function createConfig(req, res, next) {
     console.error("Create config error:", error);
     return res.status(500).json({
       success: false,
-      message: "เกิดข้อผิดพลาดในการสร้าง config" + error,
+      message: "เกิดข้อผิดพลาดในการสร้าง config",
     });
   }
 }
