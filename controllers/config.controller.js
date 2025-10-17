@@ -46,20 +46,20 @@ export async function getConfigById(req, res) {
 
 export async function createConfig(req, res, next) {
   try {
-    const { name, type = "TECHNICIAL" } = req.body;
+    // const { name, type = "TECHNICIAL" } = req.body;
 
     // Validate required fields
 
     return res.status(201).json({
       success: true,
       message: "สร้าง config สำเร็จ",
-      data: config,
+      data: "",
     });
   } catch (error) {
     console.error("Create config error:", error);
     return res.status(500).json({
       success: false,
-      message: "เกิดข้อผิดพลาดในการสร้าง config",
+      message: "เกิดข้อผิดพลาดในการสร้าง config" + error,
     });
   }
 }
