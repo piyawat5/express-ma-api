@@ -37,6 +37,7 @@ export async function getConfigs(req, res) {
       where,
       include: {
         technicials: true,
+        workorderItems: true,
       },
       skip,
       take: sizeNum,
