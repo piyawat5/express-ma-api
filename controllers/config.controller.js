@@ -108,18 +108,23 @@ export async function createConfig(req, res, next) {
       });
     }
 
-    // ตรวจสอบว่าค่า type ถูกต้องหรือไม่
-    if (!Object.values(ConfigType).includes(type)) {
+    const normalizedType = Object.keys(ConfigType).find(
+      (key) => key.toLowerCase() === type.toLowerCase()
+    );
+
+    if (!normalizedType) {
       return res.status(400).json({
         success: false,
-        message: `type "${type}" ไม่ถูกต้อง (ต้องเป็น TECHNICIAL หรือ WORKORDERTYPE)`,
+        message: `type "${type}" ไม่ถูกต้อง (ต้องเป็น ${Object.keys(
+          ConfigType
+        ).join(" หรือ ")})`,
       });
     }
 
     const config = await prisma.config.create({
       data: {
         name,
-        type: ConfigType[type], // ✅ แปลงจาก string เป็น enum
+        type: ConfigType[normalizedType], // ✅ แปลงจาก string เป็น enum
       },
       include: {
         technicials: true,
