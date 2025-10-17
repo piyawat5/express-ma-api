@@ -49,23 +49,6 @@ export async function createConfig(req, res, next) {
     const { name, type = "TECHNICIAL" } = req.body;
 
     // Validate required fields
-    if (!name) {
-      return res.status(400).json({
-        success: false,
-        message: "กรุณากรอกชื่อ config",
-      });
-    }
-
-    // Create config
-    const config = await prisma.config.create({
-      data: {
-        name,
-        type,
-      },
-      include: {
-        technicials: true,
-      },
-    });
 
     return res.status(201).json({
       success: true,
