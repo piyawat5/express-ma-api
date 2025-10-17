@@ -77,7 +77,7 @@ export async function createConfig(req, res, next) {
     console.error("Create config error:", error);
     return res.status(500).json({
       success: false,
-      message: "เกิดข้อผิดพลาดในการสร้าง config",
+      message: "เกิดข้อผิดพลาดในการสร้าง config" + error,
     });
   }
 }
