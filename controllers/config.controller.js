@@ -59,7 +59,7 @@ export async function getConfigs(req, res) {
     console.error("Get configs error:", error);
     return res.status(500).json({
       success: false,
-      message: "เกิดข้อผิดพลาดในการดึงข้อมูล config",
+      message: "เกิดข้อผิดพลาดในการดึงข้อมูล config" + error,
     });
   }
 }

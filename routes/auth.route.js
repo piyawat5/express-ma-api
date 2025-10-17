@@ -9,7 +9,6 @@ import {
   getWorkorderById,
   getWorkorders,
   register,
-  test,
   updateWorkorder,
 } from "../controllers/workorder.controller.js";
 
@@ -55,8 +54,6 @@ router.get("/technicial/:id", getTechnicialById); //
 router.get("/technicial", getTechnicials);
 
 router.post("/auth/register", register);
-router.get("/test", test);
-router.get("/foo", test);
 
 // TODO: validate
 
