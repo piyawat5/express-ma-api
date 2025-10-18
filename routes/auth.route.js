@@ -14,6 +14,7 @@ import {
 
 import {
   createConfig,
+  createConfigsType,
   deleteConfig,
   getConfigById,
   getConfigs,
@@ -40,6 +41,7 @@ router.get("/workorder/:id", getWorkorderById); //
 router.get("/workorder", getWorkorders);
 
 // ------------- config --------------
+router.post("/configType/create", createConfigsType);
 router.post("/config/create", createConfig);
 router.put("/config/update/:id", updateConfig);
 router.delete("/config/delete/:id", deleteConfig);
