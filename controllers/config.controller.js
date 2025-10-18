@@ -135,12 +135,16 @@ export async function createConfigsType(req, res, next) {
     if (!name) {
       return next(createError(409, "กรุณากรอกชื่อประเภท"));
     }
-    const type = await prisma.configType.create({
+    const configType = await prisma.configType.create({
       data: { name },
     });
     return res
       .status(201)
-      .json({ success: true, message: "สร้าง config type สำเร็จ", data: type });
+      .json({
+        success: true,
+        message: "สร้าง config type สำเร็จ",
+        data: configType,
+      });
   } catch (error) {
     return res.status(500).json({
       success: false,
