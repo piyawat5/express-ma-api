@@ -98,32 +98,16 @@ export async function getConfigById(req, res) {
 
 export async function createConfig(req, res, next) {
   try {
-    const { name, type } = req.body;
+    const { name } = req.body;
 
     // Validate required fields
     if (!name) {
       return next(createError(409, "กรุณากรอกชื่อ config"));
     }
 
-    const normalizedType = Object.keys(ConfigType).find(
-      (key) => key.toLowerCase() === type.toLowerCase()
-    );
-
-    if (!normalizedType) {
-      return next(
-        createError(
-          409,
-          `type "${type}" ไม่ถูกต้อง (ต้องเป็น ${Object.keys(ConfigType).join(
-            " หรือ "
-          )})`
-        )
-      );
-    }
-
     const config = await prisma.config.create({
       data: {
         name,
-        type: ConfigType[normalizedType], // ✅ แปลงจาก string เป็น enum
       },
       include: {
         technicials: true,
