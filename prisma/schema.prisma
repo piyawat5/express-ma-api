@@ -68,8 +68,8 @@ model WorkorderItem {
   id          String   @id @default(uuid())
   assignedTo  AssignedUser[]
   attachments AttachmentWorkorder[]
-  config      Config   @relation(fields: [configId], references: [id])
-  configId    String 
+  config      Config?   @relation(fields: [configId], references: [id])
+  configId    String? 
   detail String?
   startDate   DateTime?
   endDate     DateTime?
@@ -94,8 +94,8 @@ model technicial {
   number    String
   spareNumber String?
   url String?
-  config    Config   @relation(fields: [configId], references: [id])
-  configId  String 
+  config    Config?   @relation(fields: [configId], references: [id])
+  configId  String? 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

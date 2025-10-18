@@ -109,10 +109,10 @@ export async function createConfig(req, res, next) {
       data: {
         name,
       },
-      include: {
-        technicials: true,
-        workorderItems: true,
-      },
+      // include: {
+      //   technicials: true,
+      //   workorderItems: true,
+      // },
     });
 
     return res.status(201).json({
