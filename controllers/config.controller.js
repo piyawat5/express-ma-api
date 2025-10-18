@@ -37,6 +37,7 @@ export async function getConfigs(req, res) {
       where,
       include: {
         technicials: true,
+        workorderItems: true,
       },
       skip,
       take: sizeNum,
@@ -59,7 +60,7 @@ export async function getConfigs(req, res) {
     console.error("Get configs error:", error);
     return res.status(500).json({
       success: false,
-      message: "เกิดข้อผิดพลาดในการดึงข้อมูล config",
+      message: "เกิดข้อผิดพลาดในการดึงข้อมูล config" + error,
     });
   }
 }
@@ -138,13 +139,11 @@ export async function createConfigsType(req, res, next) {
     const configType = await prisma.configType.create({
       data: { name },
     });
-    return res
-      .status(201)
-      .json({
-        success: true,
-        message: "สร้าง config type สำเร็จ",
-        data: configType,
-      });
+    return res.status(201).json({
+      success: true,
+      message: "สร้าง config type สำเร็จ",
+      data: configType,
+    });
   } catch (error) {
     return res.status(500).json({
       success: false,
