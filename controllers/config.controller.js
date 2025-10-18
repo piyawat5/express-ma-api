@@ -1,5 +1,4 @@
 import prisma from "../config/prisma.js";
-import { ConfigType } from "@prisma/client";
 import createError from "../utils/createError.js";
 
 export async function getConfigs(req, res) {

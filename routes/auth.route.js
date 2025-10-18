@@ -40,8 +40,9 @@ router.delete("/workorder/delete/:id", deleteWorkorder);
 router.get("/workorder/:id", getWorkorderById); //
 router.get("/workorder", getWorkorders);
 
+router.post("/config/type/create", createConfigsType);
+
 // ------------- config --------------
-router.post("/configType/create", createConfigsType);
 router.post("/config/create", createConfig);
 router.put("/config/update/:id", updateConfig);
 router.delete("/config/delete/:id", deleteConfig);
