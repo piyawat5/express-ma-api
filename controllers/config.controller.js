@@ -98,7 +98,7 @@ export async function getConfigById(req, res) {
 
 export async function createConfig(req, res, next) {
   try {
-    const { name } = req.body;
+    const { name, type = "TECHNICIAL" } = req.body;
 
     // Validate required fields
     if (!name) {
@@ -108,6 +108,7 @@ export async function createConfig(req, res, next) {
     const config = await prisma.config.create({
       data: {
         name,
+        type,
       },
       // include: {
       //   technicials: true,
