@@ -98,7 +98,7 @@ export async function getConfigById(req, res) {
 
 export async function createConfig(req, res, next) {
   try {
-    const { name, type = "TECHNICIAL" } = req.body;
+    const { name, type = ConfigType.TECHNICIAL } = req.body;
 
     // Validate required fields
     if (!name) {
