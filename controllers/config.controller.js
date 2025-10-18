@@ -98,22 +98,22 @@ export async function getConfigById(req, res) {
 
 export async function createConfig(req, res, next) {
   try {
-    const { name, type = ConfigType.TECHNICIAL } = req.body;
+    const { name, configTypeId } = req.body;
 
     // Validate required fields
     if (!name) {
       return next(createError(409, "กรุณากรอกชื่อ config"));
     }
 
+    if (!configTypeId) {
+      return next(createError(409, "กรุณาเลือก configType"));
+    }
+
     const config = await prisma.config.create({
       data: {
         name,
-        type,
+        configTypeId,
       },
-      // include: {
-      //   technicials: true,
-      //   workorderItems: true,
-      // },
     });
 
     return res.status(201).json({
@@ -121,6 +121,23 @@ export async function createConfig(req, res, next) {
       message: "สร้าง config สำเร็จ",
       data: config,
     });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "เกิดข้อผิดพลาดในการสร้าง config" + error,
+    });
+  }
+}
+
+export async function createConfigsType(req, res, next) {
+  try {
+    const { name } = req.body;
+    const type = await prisma.configType.create({
+      data: { name },
+    });
+    return res
+      .status(201)
+      .json({ success: true, message: "สร้าง config type สำเร็จ", data: type });
   } catch (error) {
     return res.status(500).json({
       success: false,

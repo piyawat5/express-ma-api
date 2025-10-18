@@ -44,13 +44,23 @@ model AssignedUser {
 
 model Config {
   id        String   @id @default(uuid())
-  type      ConfigType? @default(TECHNICIAL)
+  configType   ConfigType @relation(fields: [configTypeId], references: [id])
+  configTypeId   String
   name      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   technicials technicial[]
   workorderItems WorkorderItem[]
+}
+
+model ConfigType {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  configs   Config[]
 }
 
 model Workorder {
@@ -105,11 +115,6 @@ enum Status {
   IN_PROGRESS
   COMPLETED
   CANCELLED
-}
-
-enum ConfigType {
-  TECHNICIAL
-  WORKORDERTYPE
 }
 
 enum UserRole {

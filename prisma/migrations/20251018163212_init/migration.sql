@@ -29,7 +29,17 @@ CREATE TABLE `AssignedUser` (
 -- CreateTable
 CREATE TABLE `Config` (
     `id` VARCHAR(191) NOT NULL,
-    `type` ENUM('TECHNICIAL', 'WORKORDERTYPE') NOT NULL DEFAULT 'TECHNICIAL',
+    `configTypeId` VARCHAR(191) NOT NULL,
+    `name` VARCHAR(191) NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `ConfigType` (
+    `id` VARCHAR(191) NOT NULL,
     `name` VARCHAR(191) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
@@ -51,7 +61,7 @@ CREATE TABLE `Workorder` (
 -- CreateTable
 CREATE TABLE `WorkorderItem` (
     `id` VARCHAR(191) NOT NULL,
-    `configId` VARCHAR(191) NOT NULL,
+    `configId` VARCHAR(191) NULL,
     `detail` VARCHAR(191) NULL,
     `startDate` DATETIME(3) NULL,
     `endDate` DATETIME(3) NULL,
@@ -80,7 +90,7 @@ CREATE TABLE `technicial` (
     `number` VARCHAR(191) NOT NULL,
     `spareNumber` VARCHAR(191) NULL,
     `url` VARCHAR(191) NULL,
-    `configId` VARCHAR(191) NOT NULL,
+    `configId` VARCHAR(191) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
@@ -94,7 +104,10 @@ ALTER TABLE `AssignedUser` ADD CONSTRAINT `AssignedUser_userId_fkey` FOREIGN KEY
 ALTER TABLE `AssignedUser` ADD CONSTRAINT `AssignedUser_workorderItemId_fkey` FOREIGN KEY (`workorderItemId`) REFERENCES `WorkorderItem`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `WorkorderItem` ADD CONSTRAINT `WorkorderItem_configId_fkey` FOREIGN KEY (`configId`) REFERENCES `Config`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `Config` ADD CONSTRAINT `Config_configTypeId_fkey` FOREIGN KEY (`configTypeId`) REFERENCES `ConfigType`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `WorkorderItem` ADD CONSTRAINT `WorkorderItem_configId_fkey` FOREIGN KEY (`configId`) REFERENCES `Config`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `WorkorderItem` ADD CONSTRAINT `WorkorderItem_workorderId_fkey` FOREIGN KEY (`workorderId`) REFERENCES `Workorder`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -103,4 +116,4 @@ ALTER TABLE `WorkorderItem` ADD CONSTRAINT `WorkorderItem_workorderId_fkey` FORE
 ALTER TABLE `AttachmentWorkorder` ADD CONSTRAINT `AttachmentWorkorder_workorderItemId_fkey` FOREIGN KEY (`workorderItemId`) REFERENCES `WorkorderItem`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `technicial` ADD CONSTRAINT `technicial_configId_fkey` FOREIGN KEY (`configId`) REFERENCES `Config`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `technicial` ADD CONSTRAINT `technicial_configId_fkey` FOREIGN KEY (`configId`) REFERENCES `Config`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
