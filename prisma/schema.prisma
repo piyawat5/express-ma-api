@@ -42,10 +42,11 @@ model AssignedUser {
   updatedAt  DateTime @updatedAt
 }
 
+//TODO พังเพราะ configType ยังไม่มี
 model Config {
   id        String   @id @default(uuid())
-  configType   ConfigType @relation(fields: [configTypeId], references: [id])
-  configTypeId   String
+  configType   ConfigType? @relation(fields: [configTypeId], references: [id])
+  configTypeId   String?
   name      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

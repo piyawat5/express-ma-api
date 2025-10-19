@@ -136,6 +136,8 @@ export async function createConfigsType(req, res, next) {
     if (!name) {
       return next(createError(409, "กรุณากรอกชื่อประเภท"));
     }
+
+    console.log("log pirsma ->", prisma);
     const configType = await prisma.configType.create({
       data: { name },
     });
