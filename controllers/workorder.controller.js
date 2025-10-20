@@ -406,6 +406,23 @@ export const register = async (req, res, next) => {
   }
 };
 
+export const createStatusApproveId = async (req, res, next) => {
+  try {
+    const { name } = req.body;
+    const statusApprove = await prisma.statusApprove.create({
+      data: {
+        name,
+      },
+    });
+    res.status(201).json({
+      message: "สร้างสถานะการอนุมัติสำเร็จ",
+      statusApprove,
+    });
+  } catch (error) {
+    next(createError(error));
+  }
+};
+
 export const test = async (req, res, next) => {
   try {
     res.json({ message: "Test controller is working!" });
