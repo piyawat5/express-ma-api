@@ -1,7 +1,7 @@
 import prisma from "../config/prisma.js";
 import createError from "../utils/createError.js";
 
-export async function getTechnicials(req, res) {
+export async function getTechnicials(req, res, next) {
   try {
     const {
       page = "1",
@@ -108,10 +108,9 @@ export async function createTechnicial(req, res, next) {
 
     // Validate required fields
     if (!name || !number || !configId) {
-      return res.status(400).json({
-        success: false,
-        message: "กรุณากรอกข้อมูลให้ครบถ้วน (name, number, configId)",
-      });
+      return next(
+        createError(400, "กรุณากรอกข้อมูลให้ครบถ้วน (name, number, configId)")
+      );
     }
 
     // Check if config exists
@@ -120,10 +119,7 @@ export async function createTechnicial(req, res, next) {
     });
 
     if (!config) {
-      return res.status(404).json({
-        success: false,
-        message: "ไม่พบ config ที่ระบุ",
-      });
+      return next(createError(404, "ไม่พบ config ที่ระบุ"));
     }
 
     // Create technicial
@@ -146,11 +142,7 @@ export async function createTechnicial(req, res, next) {
       data: technicial,
     });
   } catch (error) {
-    console.error("Create technicial error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "เกิดข้อผิดพลาดในการสร้างข้อมูลช่าง",
-    });
+    next(createError(error));
   }
 }
 
@@ -165,10 +157,7 @@ export async function updateTechnicial(req, res, next) {
     });
 
     if (!existingTechnicial) {
-      return res.status(404).json({
-        success: false,
-        message: "ไม่พบข้อมูลช่าง",
-      });
+      return next(createError(404, "ไม่พบข้อมูลช่าง"));
     }
 
     // If configId is provided, check if it exists
@@ -178,10 +167,7 @@ export async function updateTechnicial(req, res, next) {
       });
 
       if (!config) {
-        return res.status(404).json({
-          success: false,
-          message: "ไม่พบ config ที่ระบุ",
-        });
+        return next(createError(404, "ไม่พบ config ที่ระบุ"));
       }
     }
 
@@ -206,11 +192,7 @@ export async function updateTechnicial(req, res, next) {
       data: technicial,
     });
   } catch (error) {
-    console.error("Update technicial error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "เกิดข้อผิดพลาดในการอัพเดทข้อมูลช่าง",
-    });
+    next(createError(error));
   }
 }
 
@@ -224,10 +206,7 @@ export async function deleteTechnicial(req, res, next) {
     });
 
     if (!existingTechnicial) {
-      return res.status(404).json({
-        success: false,
-        message: "ไม่พบข้อมูลช่าง",
-      });
+      return next(createError(404, "ไม่พบข้อมูลช่าง"));
     }
 
     // Delete technicial
@@ -240,10 +219,6 @@ export async function deleteTechnicial(req, res, next) {
       message: "ลบข้อมูลช่างสำเร็จ",
     });
   } catch (error) {
-    console.error("Delete technicial error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "เกิดข้อผิดพลาดในการลบข้อมูลช่าง",
-    });
+    next(createError(error));
   }
 }

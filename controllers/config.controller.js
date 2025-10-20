@@ -57,15 +57,11 @@ export async function getConfigs(req, res) {
       },
     });
   } catch (error) {
-    console.error("Get configs error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "เกิดข้อผิดพลาดในการดึงข้อมูล config" + error,
-    });
+    next(createError(error));
   }
 }
 
-export async function getConfigById(req, res) {
+export async function getConfigById(req, res, next) {
   try {
     const { id } = req.params;
 
@@ -77,10 +73,7 @@ export async function getConfigById(req, res) {
     });
 
     if (!config) {
-      return res.status(404).json({
-        success: false,
-        message: "ไม่พบ config",
-      });
+      return next(createError(404, "ไม่พบ config"));
     }
 
     return res.json({
@@ -88,11 +81,7 @@ export async function getConfigById(req, res) {
       data: config,
     });
   } catch (error) {
-    console.error("Get config by id error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "เกิดข้อผิดพลาดในการดึงข้อมูล config",
-    });
+    next(createError(error));
   }
 }
 
@@ -122,10 +111,7 @@ export async function createConfig(req, res, next) {
       data: config,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "เกิดข้อผิดพลาดในการสร้าง config" + error,
-    });
+    next(createError(error));
   }
 }
 
@@ -137,7 +123,6 @@ export async function createConfigsType(req, res, next) {
       return next(createError(409, "กรุณากรอกชื่อประเภท"));
     }
 
-    console.log("log pirsma ->", Object.keys(prisma));
     const configType = await prisma.configType.create({
       data: { name },
     });
@@ -147,10 +132,7 @@ export async function createConfigsType(req, res, next) {
       data: configType,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "เกิดข้อผิดพลาดในการสร้าง config" + error,
-    });
+    next(createError(error));
   }
 }
 
@@ -165,10 +147,7 @@ export async function updateConfig(req, res, next) {
     });
 
     if (!existingConfig) {
-      return res.status(404).json({
-        success: false,
-        message: "ไม่พบ config",
-      });
+      return next(createError(404, "ไม่พบ config"));
     }
 
     // Update config
@@ -189,11 +168,7 @@ export async function updateConfig(req, res, next) {
       data: config,
     });
   } catch (error) {
-    console.error("Update config error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "เกิดข้อผิดพลาดในการอัพเดท config",
-    });
+    next(createError(error));
   }
 }
 
@@ -210,18 +185,17 @@ export async function deleteConfig(req, res, next) {
     });
 
     if (!existingConfig) {
-      return res.status(404).json({
-        success: false,
-        message: "ไม่พบ config",
-      });
+      return next(createError(404, "ไม่พบ config"));
     }
 
     // Check if config has related technicials
     if (existingConfig.technicials.length > 0) {
-      return res.status(400).json({
-        success: false,
-        message: "ไม่สามารถลบ config ได้ เนื่องจากมีช่างที่เชื่อมโยงอยู่",
-      });
+      return next(
+        createError(
+          400,
+          "ไม่สามารถลบ config ได้ เนื่องจากมีช่างที่เชื่อมโยงอยู่"
+        )
+      );
     }
 
     // Delete config
@@ -234,10 +208,6 @@ export async function deleteConfig(req, res, next) {
       message: "ลบ config สำเร็จ",
     });
   } catch (error) {
-    console.error("Delete config error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "เกิดข้อผิดพลาดในการลบ config",
-    });
+    next(createError(error));
   }
 }

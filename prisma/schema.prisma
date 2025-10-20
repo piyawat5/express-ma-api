@@ -36,7 +36,7 @@ model AssignedUser {
   id         String   @id @default(uuid())
   user       User     @relation(fields: [userId], references: [id])
   userId     String
-  WorkorderItem WorkorderItem @relation(fields: [workorderItemId], references: [id])
+  WorkorderItem WorkorderItem @relation(fields: [workorderItemId], references: [id], onDelete: Cascade)
   workorderItemId String
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
@@ -45,13 +45,13 @@ model AssignedUser {
 //TODO พังเพราะ configType ยังไม่มี
 model Config {
   id        String   @id @default(uuid())
-  configType   ConfigType? @relation(fields: [configTypeId], references: [id])
+  configType   ConfigType? @relation(fields: [configTypeId], references: [id], onDelete: Cascade)
   configTypeId   String?
   name      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  technicials technicial[]
+  technicials Technicial[]
   workorderItems WorkorderItem[]
 }
 
@@ -79,12 +79,14 @@ model WorkorderItem {
   id          String   @id @default(uuid())
   assignedTo  AssignedUser[]
   attachments AttachmentWorkorder[]
-  config      Config?   @relation(fields: [configId], references: [id])
+  config      Config?   @relation(fields: [configId], references: [id], onDelete: Cascade)
   configId    String? 
   detail String?
   startDate   DateTime?
   endDate     DateTime?
-  workorder   Workorder @relation(fields: [workorderId], references: [id])
+  StatusApprove StatusApprove? @relation(fields: [statusApproveId], references: [id], onDelete: Cascade)
+  statusApproveId Int?
+  workorder   Workorder @relation(fields: [workorderId], references: [id], onDelete: Cascade)
   workorderId String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -93,22 +95,31 @@ model WorkorderItem {
 model AttachmentWorkorder {
   id        String   @id @default(uuid())
   url       String
-  WorkorderItem WorkorderItem @relation(fields: [workorderItemId], references: [id])
+  WorkorderItem WorkorderItem @relation(fields: [workorderItemId], references: [id], onDelete: Cascade)
   workorderItemId String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 } 
 
-model technicial {
+model Technicial {
   id        String   @id @default(uuid())
   name      String
   number    String
   spareNumber String?
   url String?
-  config    Config?   @relation(fields: [configId], references: [id])
+  config    Config?   @relation(fields: [configId], references: [id], onDelete: Cascade)
   configId  String? 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model StatusApprove {
+  id       Int      @id @default(autoincrement()) 
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  workorderItems WorkorderItem[]
 }
 
 enum Status {

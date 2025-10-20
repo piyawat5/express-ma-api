@@ -4,16 +4,13 @@ import bcrypt from "bcryptjs";
 
 import { sendLineMessage } from "../utils/lineNotify.js";
 
-export async function createWorkorder(req, res) {
+export async function createWorkorder(req, res, next) {
   try {
     // บันทึกข้อมูล
     const { title, status, workorderItems } = req.body;
 
     if (!workorderItems || workorderItems.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "At least one workorder item is required",
-      });
+      return next(createError(400, "At least one workorder item is required"));
     }
 
     // Validate user IDs if provided
@@ -36,11 +33,16 @@ export async function createWorkorder(req, res) {
       );
 
       if (invalidUserIds.length > 0) {
-        return res.status(400).json({
-          success: false,
-          message: "Invalid or inactive user IDs",
-          invalidUserIds,
-        });
+        return next(
+          createError(400, "Invalid or inactive user IDs: " + invalidUserIds)
+        );
+      }
+
+      const checkConfigType = workorderItems.some((item) => !item.configId);
+      if (checkConfigType) {
+        return next(
+          createError(400, "กรุณาเลือก config สำหรับ workorder item")
+        );
       }
     }
 
@@ -51,7 +53,9 @@ export async function createWorkorder(req, res) {
         status: status || "PENDING",
         workorderItems: {
           create: workorderItems.map((item) => ({
+            configId: item.configId,
             detail: item.detail,
+            statusApproveId: 1, // default pending
             startDate: item.startDate ? new Date(item.startDate) : undefined,
             endDate: item.endDate ? new Date(item.endDate) : undefined,
             assignedTo: item.assignedTo
@@ -93,33 +97,19 @@ export async function createWorkorder(req, res) {
       },
     });
 
-    //post api approve
-
+    //TODO: post api approve
     // ส่งไลน์
-    let message = `🔔แจ้งเตือนรายการแจ้งซ่อม!\n\n`;
-    message += `📋 หัวข้อ: ${workorder.title}\n`;
-    message += `📊 สถานะ: ${workorder.status}\n`;
-    message += `📅 วันที่สร้าง: ${new Date(workorder.createdAt).toLocaleString(
-      "th-TH"
-    )}\n`;
-    message += `\n━━━━━━━━━━━━━━━━━━\n`;
+    let message = `🔔 มีรายการแจ้งซ่อม!\n\n`;
 
     // แสดงรายละเอียดแต่ละ workorder item
     workorder.workorderItems.forEach((item, index) => {
       message += `\n📌 รายการที่ ${index + 1}\n`;
 
-      if (item.detail) {
-        message += `   รายละเอียด: ${item.detail}\n`;
+      if (item.configId) {
+        message += `   รายละเอียด: ${item.configId}\n`;
       }
-
       if (item.startDate) {
         message += `   เริ่มต้น: ${new Date(item.startDate).toLocaleString(
-          "th-TH"
-        )}\n`;
-      }
-
-      if (item.endDate) {
-        message += `   สิ้นสุด: ${new Date(item.endDate).toLocaleString(
           "th-TH"
         )}\n`;
       }
@@ -135,11 +125,6 @@ export async function createWorkorder(req, res) {
           message += `      • ${fullName}\n`;
         });
       }
-
-      // แสดงจำนวนไฟล์แนบ
-      if (item.attachments && item.attachments.length > 0) {
-        message += `   📎 ไฟล์แนบ: ${item.attachments.length} ไฟล์\n`;
-      }
     });
 
     await sendLineMessage(message);
@@ -150,8 +135,7 @@ export async function createWorkorder(req, res) {
       data: workorder,
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "เกิดข้อผิดพลาด" });
+    next(createError(error));
   }
 }
 
@@ -204,6 +188,7 @@ export async function getWorkorders(req, res) {
       include: {
         workorderItems: {
           include: {
+            config: true,
             assignedTo: {
               include: {
                 user: {
@@ -239,11 +224,7 @@ export async function getWorkorders(req, res) {
       },
     });
   } catch (error) {
-    console.error("Get workorders error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "เกิดข้อผิดพลาดในการดึงข้อมูล workorder",
-    });
+    next(createError(error));
   }
 }
 
@@ -276,10 +257,7 @@ export const getWorkorderById = async (req, res, next) => {
     });
 
     if (!workorder) {
-      return res.status(404).json({
-        success: false,
-        message: "ไม่พบ workorder",
-      });
+      return next(createError(404, "ไม่พบ workorder"));
     }
 
     return res.json({
@@ -287,11 +265,7 @@ export const getWorkorderById = async (req, res, next) => {
       data: workorder,
     });
   } catch (error) {
-    console.error("Get workorder by id error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "เกิดข้อผิดพลาดในการดึงข้อมูล workorder",
-    });
+    next(createError(error));
   }
 };
 
@@ -306,10 +280,7 @@ export const updateWorkorder = async (req, res, next) => {
     });
 
     if (!existingWorkorder) {
-      return res.status(404).json({
-        success: false,
-        message: "ไม่พบ workorder",
-      });
+      return next(createError(404, "ไม่พบ workorder"));
     }
 
     // Update workorder
@@ -325,6 +296,7 @@ export const updateWorkorder = async (req, res, next) => {
               detail: item.detail,
               startDate: item.startDate ? new Date(item.startDate) : null,
               endDate: item.endDate ? new Date(item.endDate) : null,
+              configId: item.configId,
               ...(item.assignedTo && {
                 assignedTo: {
                   create: item.assignedTo.map((userId) => ({
@@ -332,6 +304,7 @@ export const updateWorkorder = async (req, res, next) => {
                   })),
                 },
               }),
+              statusApproveId: item.statusApproveId || 1,
               ...(item.attachments && {
                 attachments: {
                   create: item.attachments.map((url) => ({
@@ -363,11 +336,7 @@ export const updateWorkorder = async (req, res, next) => {
       data: workorder,
     });
   } catch (error) {
-    console.error("Update workorder error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "เกิดข้อผิดพลาดในการอัพเดท workorder",
-    });
+    next(createError(error));
   }
 };
 
@@ -381,10 +350,7 @@ export const deleteWorkorder = async (req, res, next) => {
     });
 
     if (!existingWorkorder) {
-      return res.status(404).json({
-        success: false,
-        message: "ไม่พบ workorder",
-      });
+      return next(createError(404, "ไม่พบ workorder"));
     }
 
     // Delete workorder (cascade will handle related records)
@@ -397,11 +363,7 @@ export const deleteWorkorder = async (req, res, next) => {
       message: "ลบ workorder สำเร็จ",
     });
   } catch (error) {
-    console.error("Delete workorder error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "เกิดข้อผิดพลาดในการลบ workorder",
-    });
+    next(createError(error));
   }
 };
 
