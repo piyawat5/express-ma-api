@@ -4,6 +4,7 @@ import express from "express";
 //   verifyOTPAndRegister,
 // } from "../controllers/authCookie.controller.js";
 import {
+  createStatusApproveId,
   createWorkorder,
   deleteWorkorder,
   getWorkorderById,
@@ -39,6 +40,7 @@ router.put("/workorder/update/:id", updateWorkorder);
 router.delete("/workorder/delete/:id", deleteWorkorder);
 router.get("/workorder/:id", getWorkorderById); //
 router.get("/workorder", getWorkorders);
+router.post("/workorder/statusApprove", createStatusApproveId);
 
 router.post("/config/type/create", createConfigsType);
 
