@@ -1,5 +1,5 @@
-// import prisma from "../config/prisma.js";
-// import createError from "../utils/createError.js";
+import prisma from "../config/prisma.js";
+import createError from "../utils/createError.js";
 // import bcrypt from "bcryptjs";
 
 import nodemailer from "nodemailer";
@@ -33,6 +33,15 @@ const sendOTPEmail = async (email, otp) => {
   };
 
   return transporter.sendMail(mailOptions);
+};
+
+export const getUsers = async (req, res, next) => {
+  try {
+    const users = await prisma.user.findMany();
+    res.json({ success: true, data: users });
+  } catch (error) {
+    next(createError(500, error));
+  }
 };
 
 // ------------------------ LOGOUT ------------------------
