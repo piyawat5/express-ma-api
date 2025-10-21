@@ -91,6 +91,7 @@ export async function createWorkorder(req, res, next) {
                 },
               },
             },
+            config: true,
             attachments: true,
           },
         },
@@ -105,8 +106,8 @@ export async function createWorkorder(req, res, next) {
     workorder.workorderItems.forEach((item, index) => {
       message += `\n📌 รายการที่ ${index + 1}\n`;
 
-      if (item.configId) {
-        message += `   รายละเอียด: ${item.configId}\n`;
+      if (item.config) {
+        message += `   รายละเอียด: ${item.config.name}\n`;
       }
       if (item.startDate) {
         message += `   เริ่มต้น: ${new Date(item.startDate).toLocaleString(
@@ -135,7 +136,7 @@ export async function createWorkorder(req, res, next) {
       data: workorder,
     });
   } catch (error) {
-    next(createError(error));
+    return next(createError(500, error));
   }
 }
 
