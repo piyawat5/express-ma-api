@@ -1,7 +1,7 @@
 import prisma from "../config/prisma.js";
 import createError from "../utils/createError.js";
 
-export async function getConfigs(req, res) {
+export async function getConfigs(req, res, next) {
   try {
     const {
       page = "1",
@@ -26,7 +26,7 @@ export async function getConfigs(req, res) {
     }
 
     if (type) {
-      where.type = type;
+      where.configTypeId = type;
     }
 
     // Get total count for pagination
