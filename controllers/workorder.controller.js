@@ -206,6 +206,7 @@ export async function getWorkorders(req, res) {
               },
             },
             attachments: true,
+            statusApprove: true,
           },
         },
       },
