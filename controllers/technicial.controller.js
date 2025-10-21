@@ -142,7 +142,7 @@ export async function createTechnicial(req, res, next) {
       data: technicial,
     });
   } catch (error) {
-    next(createError(error));
+    next(createError(500, error));
   }
 }
 
@@ -192,7 +192,7 @@ export async function updateTechnicial(req, res, next) {
       data: technicial,
     });
   } catch (error) {
-    next(createError(error));
+    next(createError(500, error));
   }
 }
 
@@ -219,6 +219,6 @@ export async function deleteTechnicial(req, res, next) {
       message: "ลบข้อมูลช่างสำเร็จ",
     });
   } catch (error) {
-    next(createError(error));
+    next(createError(500, error));
   }
 }

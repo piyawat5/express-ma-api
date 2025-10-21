@@ -24,7 +24,6 @@ export async function sendLineMessage(message) {
       }
     );
 
-    console.log("LINE message sent successfully");
     return response.data;
   } catch (error) {
     console.error(

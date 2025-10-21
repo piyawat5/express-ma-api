@@ -99,8 +99,9 @@ export async function createWorkorder(req, res, next) {
     });
 
     //TODO: post api approve
+    //TODO: ทำ link กดไปที่ ระบบ approve ใน line message เลย
     // ส่งไลน์
-    let message = `🔔 มีรายการแจ้งซ่อม!\n\n`;
+    let message = `🔔 มีรายการแจ้งซ่อม!\n`;
 
     // แสดงรายละเอียดแต่ละ workorder item
     workorder.workorderItems.forEach((item, index) => {
@@ -225,7 +226,7 @@ export async function getWorkorders(req, res) {
       },
     });
   } catch (error) {
-    next(createError(error));
+    next(createError(500, error));
   }
 }
 
@@ -266,7 +267,7 @@ export const getWorkorderById = async (req, res, next) => {
       data: workorder,
     });
   } catch (error) {
-    next(createError(error));
+    next(createError(500, error));
   }
 };
 
@@ -337,7 +338,7 @@ export const updateWorkorder = async (req, res, next) => {
       data: workorder,
     });
   } catch (error) {
-    next(createError(error));
+    next(createError(500, error));
   }
 };
 
@@ -364,7 +365,7 @@ export const deleteWorkorder = async (req, res, next) => {
       message: "ลบ workorder สำเร็จ",
     });
   } catch (error) {
-    next(createError(error));
+    next(createError(500, error));
   }
 };
 
@@ -420,7 +421,7 @@ export const createStatusApproveId = async (req, res, next) => {
       statusApprove,
     });
   } catch (error) {
-    next(createError(error));
+    next(createError(500, error));
   }
 };
 

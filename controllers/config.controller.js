@@ -57,7 +57,7 @@ export async function getConfigs(req, res) {
       },
     });
   } catch (error) {
-    next(createError(error));
+    next(createError(500, error));
   }
 }
 
@@ -81,7 +81,7 @@ export async function getConfigById(req, res, next) {
       data: config,
     });
   } catch (error) {
-    next(createError(error));
+    next(createError(500, error));
   }
 }
 
@@ -111,7 +111,7 @@ export async function createConfig(req, res, next) {
       data: config,
     });
   } catch (error) {
-    next(createError(error));
+    next(createError(500, error));
   }
 }
 
@@ -132,7 +132,7 @@ export async function createConfigsType(req, res, next) {
       data: configType,
     });
   } catch (error) {
-    next(createError(error));
+    next(createError(500, error));
   }
 }
 
@@ -168,7 +168,7 @@ export async function updateConfig(req, res, next) {
       data: config,
     });
   } catch (error) {
-    next(createError(error));
+    next(createError(500, error));
   }
 }
 
@@ -208,6 +208,6 @@ export async function deleteConfig(req, res, next) {
       message: "ลบ config สำเร็จ",
     });
   } catch (error) {
-    next(createError(error));
+    next(createError(500, error));
   }
 }
