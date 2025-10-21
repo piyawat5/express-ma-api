@@ -142,7 +142,7 @@ export async function createWorkorder(req, res, next) {
   }
 }
 
-export async function getWorkorders(req, res) {
+export async function getWorkorders(req, res, next) {
   try {
     const {
       page = "1",
@@ -206,7 +206,7 @@ export async function getWorkorders(req, res) {
               },
             },
             attachments: true,
-            statusApprove: true,
+            StatusApprove: true,
           },
         },
       },
