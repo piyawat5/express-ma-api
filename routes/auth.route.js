@@ -35,27 +35,27 @@ import {
 const router = express.Router();
 
 // ------------- workorder --------------
-router.post("/workorder/create", createWorkorder);
-router.put("/workorder/update/:id", updateWorkorder);
-router.delete("/workorder/delete/:id", deleteWorkorder);
+router.post("/workorder/create", createWorkorder); //
+router.put("/workorder/update/:id", updateWorkorder); //
+router.delete("/workorder/delete/:id", deleteWorkorder); //
 router.get("/workorder/:id", getWorkorderById); //
-router.get("/workorder", getWorkorders);
-router.post("/workorder/statusApprove", createStatusApproveId);
+router.get("/workorder", getWorkorders); //
+router.post("/workorder/statusApprove", createStatusApproveId); //
 
-router.post("/config/type/create", createConfigsType);
+router.post("/config/type/create", createConfigsType); //
 
 // ------------- config --------------
-router.post("/config/create", createConfig);
-router.put("/config/update/:id", updateConfig);
-router.delete("/config/delete/:id", deleteConfig);
+router.post("/config/create", createConfig); //
+router.put("/config/update/:id", updateConfig); //
+router.delete("/config/delete/:id", deleteConfig); //
 router.get("/config/:id", getConfigById); //
-router.get("/config", getConfigs);
+router.get("/config", getConfigs); //
 
 // ------------- technicial --------------
 router.post("/technicial/create", createTechnicial);
 router.put("/technicial/update/:id", updateTechnicial);
 router.delete("/technicial/delete/:id", deleteTechnicial);
-router.get("/technicial/:id", getTechnicialById); //
+router.get("/technicial/:id", getTechnicialById);
 router.get("/technicial", getTechnicials);
 
 router.post("/auth/register", register);

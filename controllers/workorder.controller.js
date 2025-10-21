@@ -100,6 +100,7 @@ export async function createWorkorder(req, res, next) {
 
     //TODO: post api approve
     //TODO: ทำ link กดไปที่ ระบบ approve ใน line message เลย
+    //TODO: update workorder แจ้งใน Line message ด้วย
     // ส่งไลน์
     let message = `🔔 มีรายการแจ้งซ่อม!\n`;
 
@@ -326,6 +327,7 @@ export const updateWorkorder = async (req, res, next) => {
                 user: true,
               },
             },
+            config: true,
             attachments: true,
           },
         },
