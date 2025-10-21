@@ -29,10 +29,15 @@ import {
   getTechnicials,
   updateTechnicial,
 } from "../controllers/technicial.controller.js";
+
+import { getUsers } from "../controllers/authCookie.controller.js";
 // import { preLogUserAction } from "../controllers/logUser.controller.js";
 // import { registerSchema, loginSchema, validate } from "../utils/validator.js";
 
 const router = express.Router();
+
+//------------- auth --------------
+router.get("/users", getUsers); //
 
 // ------------- workorder --------------
 router.post("/workorder/create", createWorkorder); //
