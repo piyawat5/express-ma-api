@@ -42,7 +42,6 @@ model AssignedUser {
   updatedAt  DateTime @updatedAt
 }
 
-//TODO พังเพราะ configType ยังไม่มี
 model Config {
   id        String   @id @default(uuid())
   configType   ConfigType? @relation(fields: [configTypeId], references: [id], onDelete: Cascade)

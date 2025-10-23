@@ -38,6 +38,7 @@ export async function getConfigs(req, res, next) {
       include: {
         technicials: true,
         workorderItems: true,
+        configType: true,
       },
       skip,
       take: sizeNum,

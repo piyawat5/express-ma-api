@@ -111,6 +111,9 @@ export async function createWorkorder(req, res, next) {
       if (item.config) {
         message += `   รายละเอียด: ${item.config.name}\n`;
       }
+      if (item.detail) {
+        message += `   สถานที่: ${item.detail}\n`;
+      }
       if (item.startDate) {
         message += `   เริ่มต้น: ${new Date(item.startDate).toLocaleString(
           "th-TH"
