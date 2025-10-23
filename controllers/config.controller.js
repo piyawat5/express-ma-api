@@ -116,6 +116,18 @@ export async function createConfig(req, res, next) {
   }
 }
 
+export async function getConfigTypes(req, res, next) {
+  try {
+    const configTypes = await prisma.configType.findMany();
+    return res.json({
+      success: true,
+      data: configTypes,
+    });
+  } catch (error) {
+    next(createError(500, error));
+  }
+}
+
 export async function createConfigsType(req, res, next) {
   try {
     const { name } = req.body;
