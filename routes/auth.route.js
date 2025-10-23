@@ -49,13 +49,13 @@ router.get("/workorder", getWorkorders); //
 router.post("/workorder/statusApprove", createStatusApproveId); //
 
 // ------------- config --------------
+router.get("/config/type", getConfigTypes); //
 router.post("/config/create", createConfig); //
 router.put("/config/update/:id", updateConfig); //
 router.delete("/config/delete/:id", deleteConfig); //
 router.get("/config/:id", getConfigById); //
 router.get("/config", getConfigs); //
 router.post("/config/type/create", createConfigsType); //
-router.get("/config/type", getConfigTypes); //
 
 // ------------- technicial --------------
 router.post("/technicial/create", createTechnicial);
