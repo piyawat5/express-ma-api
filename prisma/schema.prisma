@@ -81,6 +81,7 @@ model WorkorderItem {
   config      Config?   @relation(fields: [configId], references: [id], onDelete: Cascade)
   configId    String? 
   detail String?
+  comment String?
   startDate   DateTime?
   endDate     DateTime?
   StatusApprove StatusApprove? @relation(fields: [statusApproveId], references: [id], onDelete: Cascade)

@@ -152,7 +152,7 @@ export async function createConfigsType(req, res, next) {
 export async function updateConfig(req, res, next) {
   try {
     const { id } = req.params;
-    const { name, type } = req.body;
+    const { name, configTypeId } = req.body;
 
     // Check if config exists
     const existingConfig = await prisma.config.findUnique({
@@ -168,7 +168,7 @@ export async function updateConfig(req, res, next) {
       where: { id },
       data: {
         ...(name && { name }),
-        ...(type && { type }),
+        ...(configTypeId && { configTypeId }),
       },
       include: {
         technicials: true,
