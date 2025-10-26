@@ -102,8 +102,8 @@ export async function createWorkorder(req, res, next) {
     //TODO: ทำ link กดไปที่ ระบบ approve ใน line message เลย
     //TODO: update workorder แจ้งใน Line message ด้วย
 
-    workorder.workorderItems.forEach(async (item) => {
-      await axios.post(`https://app.family-sivarom.com/approve/create`, {
+    workorderItems.forEach(async (item) => {
+      await axios.post(`https://api-app.family-sivarom.com/approve/create`, {
         url: "https://example.com/document/67890",
         title: item.config.name,
         detail: item.detail,
