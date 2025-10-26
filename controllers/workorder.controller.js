@@ -3,6 +3,7 @@ import createError from "../utils/createError.js";
 import bcrypt from "bcryptjs";
 
 import { sendLineMessage } from "../utils/lineNotify.js";
+import axios from "axios";
 
 export async function createWorkorder(req, res, next) {
   try {
@@ -98,42 +99,55 @@ export async function createWorkorder(req, res, next) {
       },
     });
 
-    //TODO: post api approve
     //TODO: ทำ link กดไปที่ ระบบ approve ใน line message เลย
     //TODO: update workorder แจ้งใน Line message ด้วย
-    // ส่งไลน์
-    let message = `🔔 มีรายการแจ้งซ่อม!\n`;
 
-    // แสดงรายละเอียดแต่ละ workorder item
-    workorder.workorderItems.forEach((item, index) => {
-      message += `\n📌 รายการที่ ${index + 1}\n`;
-
-      if (item.config) {
-        message += `   รายละเอียด: ${item.config.name}\n`;
-      }
-      if (item.detail) {
-        message += `   สถานที่: ${item.detail}\n`;
-      }
-      if (item.startDate) {
-        message += `   เริ่มต้น: ${new Date(item.startDate).toLocaleString(
-          "th-TH"
-        )}\n`;
-      }
-
-      // แสดงผู้รับผิดชอบ
-      if (item.assignedTo && item.assignedTo.length > 0) {
-        message += `   👤 ผู้รับผิดชอบ:\n`;
-        item.assignedTo.forEach((assigned) => {
-          const fullName =
-            [assigned.user.firstName, assigned.user.lastName]
-              .filter(Boolean)
-              .join(" ") || assigned.user.email;
-          message += `      • ${fullName}\n`;
-        });
-      }
+    workorder.workorderItems.forEach(async (item) => {
+      await axios.post(`https://app.family-sivarom.com/approve/${item.id}`, {
+        url: "https://example.com/document/67890",
+        title: item.config.name,
+        detail: item.detail,
+        comment: item.comment || "",
+        idFrom: item.id,
+        apiPath:
+          "https://api-ma.family-sivarom.com/workorder/updateStatusWorkorderItem/",
+        statusApproveId: 1,
+        configId: "6d881a00-dd75-4839-b636-ec65b22cc945", //ระบบ MA
+        userId: item.assignedTo[0].userId,
+      });
     });
 
-    await sendLineMessage(message);
+    // ส่งไลน์
+    // let message = `🔔 มีรายการแจ้งซ่อม!\n`;
+
+    // workorder.workorderItems.forEach((item, index) => {
+    //   message += `\n📌 รายการที่ ${index + 1}\n`;
+
+    //   if (item.config) {
+    //     message += `   รายละเอียด: ${item.config.name}\n`;
+    //   }
+    //   if (item.detail) {
+    //     message += `   สถานที่: ${item.detail}\n`;
+    //   }
+    //   if (item.startDate) {
+    //     message += `   เริ่มต้น: ${new Date(item.startDate).toLocaleString(
+    //       "th-TH"
+    //     )}\n`;
+    //   }
+
+    //   if (item.assignedTo && item.assignedTo.length > 0) {
+    //     message += `   👤 ผู้รับผิดชอบ:\n`;
+    //     item.assignedTo.forEach((assigned) => {
+    //       const fullName =
+    //         [assigned.user.firstName, assigned.user.lastName]
+    //           .filter(Boolean)
+    //           .join(" ") || assigned.user.email;
+    //       message += `      • ${fullName}\n`;
+    //     });
+    //   }
+    // });
+
+    // await sendLineMessage(message);
 
     return res.status(201).json({
       success: true,
