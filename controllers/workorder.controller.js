@@ -375,6 +375,35 @@ export const deleteWorkorder = async (req, res, next) => {
   }
 };
 
+export const updateStatusWorkorderItem = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { statusApproveId, comment } = req.body;
+    // Check if workorder item exists
+    const existingWorkorderItem = await prisma.workorderItem.findUnique({
+      where: { id },
+    });
+    if (!existingWorkorderItem) {
+      return next(createError(404, "ไม่พบ workorder item"));
+    }
+    // Update workorder item status
+    const workorderItem = await prisma.workorderItem.update({
+      where: { id },
+      data: {
+        statusApproveId,
+        comment,
+      },
+    });
+    return res.json({
+      success: true,
+      message: "อัพเดทสถานะ workorder item สำเร็จ",
+      data: workorderItem,
+    });
+  } catch (error) {
+    next(createError(500, error));
+  }
+};
+
 export const register = async (req, res, next) => {
   try {
     /* 

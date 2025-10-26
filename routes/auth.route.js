@@ -10,6 +10,7 @@ import {
   getWorkorderById,
   getWorkorders,
   register,
+  updateStatusWorkorderItem,
   updateWorkorder,
 } from "../controllers/workorder.controller.js";
 
@@ -46,6 +47,7 @@ router.put("/workorder/update/:id", updateWorkorder); //
 router.delete("/workorder/delete/:id", deleteWorkorder); //
 router.get("/workorder/:id", getWorkorderById); //
 router.get("/workorder", getWorkorders); //
+router.put("/workorder/updateStatusWorkorderItem", updateStatusWorkorderItem); //
 router.post("/workorder/statusApprove", createStatusApproveId); //
 
 // ------------- config --------------
