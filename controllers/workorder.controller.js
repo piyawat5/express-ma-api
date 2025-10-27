@@ -102,20 +102,26 @@ export async function createWorkorder(req, res, next) {
     //TODO: ทำ link กดไปที่ ระบบ approve ใน line message เลย
     //TODO: update workorder แจ้งใน Line message ด้วย
 
-    workorderItems.forEach(async (item) => {
-      await axios.post(`https://api-app.family-sivarom.com/approve/create`, {
-        url: "https://example.com/document/67890",
-        title: item.config.name,
-        detail: item.detail,
-        comment: item.comment || "",
-        idFrom: item.id,
-        apiPath:
-          "https://api-ma.family-sivarom.com/workorder/updateStatusWorkorderItem/",
-        statusApproveId: 1,
-        configId: "6d881a00-dd75-4839-b636-ec65b22cc945", //ระบบ MA
-        userId: item.assignedTo[0].userId,
-      });
-    });
+    await Promise.all(
+      workorder.workorderItems.map(async (item) => {
+        if (item.assignedTo && item.assignedTo.length > 0) {
+          return axios.post(
+            `https://api-app.family-sivarom.com/approve/create`,
+            {
+              url: "https://example.com/document/67890",
+              title: item?.config?.name,
+              detail: item?.detail,
+              comment: item.comment || "",
+              idFrom: item.id,
+              apiPath: `https://api-ma.family-sivarom.com/workorder/updateStatusWorkorderItem/`,
+              statusApproveId: 1,
+              configId: "6d881a00-dd75-4839-b636-ec65b22cc945",
+              userId: item.assignedTo[0].userId,
+            }
+          );
+        }
+      })
+    );
 
     // ส่งไลน์
     // let message = `🔔 มีรายการแจ้งซ่อม!\n`;
