@@ -32,7 +32,11 @@ import {
   updateTechnicial,
 } from "../controllers/technicial.controller.js";
 
-import { getUsers, login } from "../controllers/authCookie.controller.js";
+import {
+  authen,
+  getUsers,
+  login,
+} from "../controllers/authCookie.controller.js";
 // import { preLogUserAction } from "../controllers/logUser.controller.js";
 // import { registerSchema, loginSchema, validate } from "../utils/validator.js";
 
@@ -71,6 +75,7 @@ router.get("/technicial", getTechnicials);
 
 router.post("/auth/register", register);
 router.post("/auth/login", login);
+router.post("/auth/verify", authen);
 
 // TODO: validate
 
