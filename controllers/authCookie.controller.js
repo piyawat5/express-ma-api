@@ -58,7 +58,7 @@ export const login = async (req, res, next) => {
     });
 
     // เช็คว่ามี user ในระบบหรือยัง
-    let user = await prisma.user.findUnique({
+    let user = await prisma.user.findFirst({
       where: { email: decoded.email },
     });
 
@@ -68,7 +68,7 @@ export const login = async (req, res, next) => {
         data: {
           email: decoded.email,
           firstName: decoded.firstName || null,
-          lastName: decoded.lastName || null,
+          lastName: decoded?.lastName || null,
           avatar: decoded.avatar || null,
         },
       });
