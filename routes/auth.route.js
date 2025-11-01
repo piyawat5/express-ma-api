@@ -37,20 +37,22 @@ import {
   getUsers,
   login,
 } from "../controllers/authCookie.controller.js";
+
+import verifyToken from "../config/verify.js";
 // import { preLogUserAction } from "../controllers/logUser.controller.js";
 // import { registerSchema, loginSchema, validate } from "../utils/validator.js";
 
 const router = express.Router();
 
 //------------- auth --------------
-router.get("/users", getUsers); //
+router.get("/users", verifyToken, getUsers); //
 
 // ------------- workorder --------------
-router.post("/workorder/create", createWorkorder); //
-router.put("/workorder/update/:id", updateWorkorder); //
-router.delete("/workorder/delete/:id", deleteWorkorder); //
-router.get("/workorder/:id", getWorkorderById); //
-router.get("/workorder", getWorkorders); //
+router.post("/workorder/create", verifyToken, createWorkorder); //
+router.put("/workorder/update/:id", verifyToken, updateWorkorder); //
+router.delete("/workorder/delete/:id", verifyToken, deleteWorkorder); //
+router.get("/workorder/:id", verifyToken, getWorkorderById); //
+router.get("/workorder", verifyToken, getWorkorders); //
 router.put(
   "/workorder/updateStatusWorkorderItem/:id",
   updateStatusWorkorderItem
@@ -58,20 +60,20 @@ router.put(
 router.post("/workorder/statusApprove", createStatusApproveId); //
 
 // ------------- config --------------
-router.get("/config/type", getConfigTypes); //
-router.post("/config/create", createConfig); //
-router.put("/config/update/:id", updateConfig); //
-router.delete("/config/delete/:id", deleteConfig); //
-router.get("/config/:id", getConfigById); //
-router.get("/config", getConfigs); //
-router.post("/config/type/create", createConfigsType); //
+router.get("/config/type", verifyToken, getConfigTypes); //
+router.post("/config/create", verifyToken, createConfig); //
+router.put("/config/update/:id", verifyToken, updateConfig); //
+router.delete("/config/delete/:id", verifyToken, deleteConfig); //
+router.get("/config/:id", verifyToken, getConfigById); //
+router.get("/config", verifyToken, getConfigs); //
+router.post("/config/type/create", verifyToken, createConfigsType); //
 
 // ------------- technicial --------------
-router.post("/technicial/create", createTechnicial);
-router.put("/technicial/update/:id", updateTechnicial);
-router.delete("/technicial/delete/:id", deleteTechnicial);
-router.get("/technicial/:id", getTechnicialById);
-router.get("/technicial", getTechnicials);
+router.post("/technicial/create", verifyToken, createTechnicial);
+router.put("/technicial/update/:id", verifyToken, updateTechnicial);
+router.delete("/technicial/delete/:id", verifyToken, deleteTechnicial);
+router.get("/technicial/:id", verifyToken, getTechnicialById);
+router.get("/technicial", verifyToken, getTechnicials);
 
 router.post("/auth/register", register);
 router.post("/auth/login", login);
