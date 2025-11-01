@@ -44,6 +44,62 @@ export const getUsers = async (req, res, next) => {
   }
 };
 
+export const login = async (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) return next(createError(401, "No token provided"));
+  const token = authHeader.split(" ")[1];
+  try {
+    const decoded = await new Promise((resolve, reject) => {
+      jwt.verify(token, process.env.JWT_SECRET_KEY, (err, decoded) => {
+        if (err) reject(createError(401, "token หมดอายุ"));
+        else resolve(decoded);
+      });
+    });
+
+    // เช็คว่ามี user ในระบบหรือยัง
+    let user = await prisma.user.findUnique({
+      where: { email: decoded.email },
+    });
+
+    // ถ้ายังไม่มี ให้สร้างใหม่
+    if (!user) {
+      user = await prisma.user.create({
+        data: {
+          email: decoded.email,
+          firstName: decoded.firstName || null,
+          lastName: decoded.lastName || null,
+          avatar: decoded.avatar || null,
+        },
+      });
+    }
+
+    // ส่งข้อมูล user กลับไป
+    res.json({
+      ...decoded,
+      userId: user.id,
+      dbUser: user,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const authen = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) return next(createError(401, "No token provided"));
+  const token = authHeader.split(" ")[1];
+  try {
+    jwt.verify(token, process.env.JWT_SECRET_KEY, (err, decoded) => {
+      if (err) {
+        return next(createError(401, "token หมดอายุ"));
+      }
+      res.json(decoded);
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 // ------------------------ LOGOUT ------------------------
 // export const logout = async (req, res) => {
 //   const refreshToken = req.cookies.jid;
