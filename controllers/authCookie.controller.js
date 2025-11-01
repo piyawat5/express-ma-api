@@ -1,5 +1,6 @@
 import prisma from "../config/prisma.js";
 import createError from "../utils/createError.js";
+import jwt from "jsonwebtoken";
 // import bcrypt from "bcryptjs";
 
 import nodemailer from "nodemailer";
