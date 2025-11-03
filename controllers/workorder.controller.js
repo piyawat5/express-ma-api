@@ -412,7 +412,7 @@ export const updateStatusWorkorderItem = async (req, res, next) => {
       where: { id },
       data: {
         statusApproveId,
-        comment,
+        ...(comment ? { comment: comment } : {}),
       },
     });
     return res.json({
