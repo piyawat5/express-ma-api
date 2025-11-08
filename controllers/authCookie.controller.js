@@ -66,6 +66,7 @@ export const login = async (req, res, next) => {
     if (!user) {
       user = await prisma.user.create({
         data: {
+          id: decoded.id,
           email: decoded.email,
           firstName: decoded.firstName || null,
           lastName: decoded?.lastName || null,
