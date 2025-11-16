@@ -142,36 +142,36 @@ export async function createWorkorder(req, res, next) {
     );
 
     // ส่งไลน์
-    // let message = `🔔 มีรายการแจ้งซ่อม!\n`;
+    let message = `🔔 มีรายการแจ้งซ่อม!\n`;
 
-    // workorder.workorderItems.forEach((item, index) => {
-    //   message += `\n📌 รายการที่ ${index + 1}\n`;
+    workorder.workorderItems.forEach((item, index) => {
+      message += `\n📌 รายการที่ ${index + 1}\n`;
 
-    //   if (item.config) {
-    //     message += `   รายละเอียด: ${item.config.name}\n`;
-    //   }
-    //   if (item.detail) {
-    //     message += `   สถานที่: ${item.detail}\n`;
-    //   }
-    //   if (item.startDate) {
-    //     message += `   เริ่มต้น: ${new Date(item.startDate).toLocaleString(
-    //       "th-TH"
-    //     )}\n`;
-    //   }
+      if (item.config) {
+        message += `   รายละเอียด: ${item.config.name}\n`;
+      }
+      if (item.detail) {
+        message += `   สถานที่: ${item.detail}\n`;
+      }
+      if (item.startDate) {
+        message += `   เริ่มต้น: ${new Date(item.startDate).toLocaleString(
+          "th-TH"
+        )}\n`;
+      }
 
-    //   if (item.assignedTo && item.assignedTo.length > 0) {
-    //     message += `   👤 ผู้รับผิดชอบ:\n`;
-    //     item.assignedTo.forEach((assigned) => {
-    //       const fullName =
-    //         [assigned.user.firstName, assigned.user.lastName]
-    //           .filter(Boolean)
-    //           .join(" ") || assigned.user.email;
-    //       message += `      • ${fullName}\n`;
-    //     });
-    //   }
-    // });
+      if (item.assignedTo && item.assignedTo.length > 0) {
+        message += `   👤 ผู้รับผิดชอบ:\n`;
+        item.assignedTo.forEach((assigned) => {
+          const fullName =
+            [assigned.user.firstName, assigned.user.lastName]
+              .filter(Boolean)
+              .join(" ") || assigned.user.email;
+          message += `      • ${fullName}\n`;
+        });
+      }
+    });
 
-    // await sendLineMessage(message);
+    await sendLineMessage(message);
 
     return res.status(201).json({
       success: true,
@@ -318,6 +318,23 @@ export const updateWorkorder = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { title, status, workorderItems } = req.body;
+
+    let invalid = workorderItems.every(
+      (item) =>
+        item.detail &&
+        item.assignedTo.length > 0 &&
+        item.startDate &&
+        item.endDate
+    );
+
+    if (invalid === false) {
+      return next(
+        createError(
+          400,
+          "กรุณากรอกข้อมูล สิ่งที่ต้องแจ้งซ่อม, Assign User, วันที่เริ่มต้น-สิ้นสุด และสถานที่ ให้ครบถ้วน"
+        )
+      );
+    }
 
     // Check if workorder exists
     const existingWorkorder = await prisma.workorder.findUnique({
