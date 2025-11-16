@@ -16,7 +16,10 @@ export async function createWorkorder(req, res, next) {
 
     let invalid = workorderItems.every(
       (item) =>
-        item.detail && assignedTo.length > 0 && item.startDate && item.endDate
+        item.detail &&
+        item.assignedTo.length > 0 &&
+        item.startDate &&
+        item.endDate
     );
 
     if (invalid === false) {
