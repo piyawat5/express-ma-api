@@ -14,6 +14,20 @@ export async function createWorkorder(req, res, next) {
       return next(createError(400, "At least one workorder item is required"));
     }
 
+    let invalid = workorderItems.every(
+      (item) =>
+        item.detail && assignedTo.length > 0 && item.startDate && item.endDate
+    );
+
+    if (invalid === false) {
+      return next(
+        createError(
+          400,
+          "กรุณากรอกข้อมูล สิ่งที่ต้องแจ้งซ่อม, Assign User, วันที่เริ่มต้น-สิ้นสุด และสถานที่ ให้ครบถ้วน"
+        )
+      );
+    }
+
     // Validate user IDs if provided
     const allUserIds = workorderItems
       .flatMap((item) => item.assignedTo || [])
