@@ -26,21 +26,21 @@ model User {
   updatedAt DateTime @updatedAt
   status    Boolean @default(true)
 
-AssignedWorkorders AssignedUser[]
-  // TODO:
-  // invalidEndDate
-  // invalidAmount
+// AssignedWorkorders AssignedUser[]
+
+  owner WorkorderItem[] @relation("UserOwnedTransactions")
+  approver WorkorderItem[] @relation("UserApprovedTransactions")
 }
 
-model AssignedUser {
-  id         String   @id @default(uuid())
-  user       User     @relation(fields: [userId], references: [id])
-  userId     String
-  WorkorderItem WorkorderItem @relation(fields: [workorderItemId], references: [id], onDelete: Cascade)
-  workorderItemId String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-}
+// model AssignedUser {
+//   id         String   @id @default(uuid())
+//   user       User     @relation(fields: [userId], references: [id])
+//   userId     String
+//   WorkorderItem WorkorderItem @relation(fields: [workorderItemId], references: [id], onDelete: Cascade)
+//   workorderItemId String
+//   createdAt  DateTime @default(now())
+//   updatedAt  DateTime @updatedAt
+// }
 
 model Config {
   id        String   @id @default(uuid())
@@ -76,7 +76,7 @@ model Workorder {
 
 model WorkorderItem {
   id          String   @id @default(uuid())
-  assignedTo  AssignedUser[]
+  // assignedTo  AssignedUser[]
   attachments AttachmentWorkorder[]
   config      Config?   @relation(fields: [configId], references: [id], onDelete: Cascade)
   configId    String? 
@@ -90,6 +90,11 @@ model WorkorderItem {
   workorderId String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+   ownerId   String?
+  approveId  String?
+   owner     User?     @relation("UserOwnedTransactions", fields: [ownerId], references: [id], onDelete: Cascade)
+  approver   User?    @relation("UserApprovedTransactions", fields: [approveId], references: [id], onDelete: Cascade)
 }
 
 model AttachmentWorkorder {

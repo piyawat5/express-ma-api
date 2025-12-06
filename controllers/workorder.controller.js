@@ -17,7 +17,8 @@ export async function createWorkorder(req, res, next) {
     let invalid = workorderItems.every(
       (item) =>
         item.detail &&
-        item.assignedTo.length > 0 &&
+        item.ownerId &&
+        item.approveId &&
         item.startDate &&
         item.endDate
     );
@@ -26,27 +27,31 @@ export async function createWorkorder(req, res, next) {
       return next(
         createError(
           400,
-          "กรุณากรอกข้อมูล สิ่งที่ต้องแจ้งซ่อม, Assign User, วันที่เริ่มต้น-สิ้นสุด และสถานที่ ให้ครบถ้วน"
+          "กรุณากรอกข้อมูล สิ่งที่ต้องแจ้งซ่อม, ผู้อนุมัติ, วันที่เริ่มต้น-สิ้นสุด และสถานที่ ให้ครบถ้วน"
         )
       );
     }
 
-    // Validate user IDs if provided
+    // Extract user IDs (ownerId + approveId)
     const allUserIds = workorderItems
-      .flatMap((item) => item.assignedTo || [])
-      .filter((id, index, self) => self.indexOf(id) === index);
+      .flatMap((item) => [item.ownerId, item.approveId])
+      .filter(Boolean); // ลบ null/undefined
 
-    if (allUserIds.length > 0) {
+    // ลบ id ซ้ำ
+    const uniqueUserIds = [...new Set(allUserIds)];
+
+    if (uniqueUserIds.length > 0) {
       const existingUsers = await prisma.user.findMany({
         where: {
-          id: { in: allUserIds },
+          id: { in: uniqueUserIds },
           status: true,
         },
         select: { id: true },
       });
 
       const existingUserIds = existingUsers.map((u) => u.id);
-      const invalidUserIds = allUserIds.filter(
+
+      const invalidUserIds = uniqueUserIds.filter(
         (id) => !existingUserIds.includes(id)
       );
 
@@ -55,13 +60,11 @@ export async function createWorkorder(req, res, next) {
           createError(400, "Invalid or inactive user IDs: " + invalidUserIds)
         );
       }
+    }
 
-      const checkConfigType = workorderItems.some((item) => !item.configId);
-      if (checkConfigType) {
-        return next(
-          createError(400, "กรุณาเลือก config สำหรับ workorder item")
-        );
-      }
+    const checkConfigType = workorderItems.some((item) => !item.configId);
+    if (checkConfigType) {
+      return next(createError(400, "กรุณาเลือก config สำหรับ workorder item"));
     }
 
     // Create workorder with nested relations
@@ -76,13 +79,8 @@ export async function createWorkorder(req, res, next) {
             statusApproveId: 1, // default pending
             startDate: item.startDate ? new Date(item.startDate) : undefined,
             endDate: item.endDate ? new Date(item.endDate) : undefined,
-            assignedTo: item.assignedTo
-              ? {
-                  create: item.assignedTo.map((userId) => ({
-                    userId,
-                  })),
-                }
-              : undefined,
+            ownerId: item.ownerId,
+            approveId: item.approveId,
             attachments: item.attachments
               ? {
                   create: item.attachments.map((url) => ({
@@ -96,17 +94,22 @@ export async function createWorkorder(req, res, next) {
       include: {
         workorderItems: {
           include: {
-            assignedTo: {
-              include: {
-                user: {
-                  select: {
-                    id: true,
-                    email: true,
-                    firstName: true,
-                    lastName: true,
-                    avatar: true,
-                  },
-                },
+            owner: {
+              select: {
+                id: true,
+                email: true,
+                firstName: true,
+                lastName: true,
+                avatar: true,
+              },
+            },
+            approver: {
+              select: {
+                id: true,
+                email: true,
+                firstName: true,
+                lastName: true,
+                avatar: true,
               },
             },
             config: true,
@@ -121,7 +124,7 @@ export async function createWorkorder(req, res, next) {
 
     await Promise.all(
       workorder.workorderItems.map(async (item) => {
-        if (item.assignedTo && item.assignedTo.length > 0) {
+        if (item.approveId && item.ownerId) {
           return axios.post(
             `https://api-app.family-sivarom.com/approve/create`,
             {
@@ -134,7 +137,9 @@ export async function createWorkorder(req, res, next) {
               apiPath: `https://api-ma.family-sivarom.com/workorder/updateStatusWorkorderItem/`,
               statusApproveId: 1,
               configId: "6d881a00-dd75-4839-b636-ec65b22cc945",
-              userId: item.assignedTo[0].userId,
+              approveId: item.approveId,
+              ownerId: item.ownerId,
+              // userId: item.assignedTo[0].userId,
             }
           );
         }
@@ -159,15 +164,14 @@ export async function createWorkorder(req, res, next) {
         )}\n`;
       }
 
-      if (item.assignedTo && item.assignedTo.length > 0) {
-        message += `   👤 ผู้รับผิดชอบ:\n`;
-        item.assignedTo.forEach((assigned) => {
-          const fullName =
-            [assigned.user.firstName, assigned.user.lastName]
-              .filter(Boolean)
-              .join(" ") || assigned.user.email;
-          message += `      • ${fullName}\n`;
-        });
+      if (item.approveId) {
+        message += `   👤 ผู้อนุมัติ:`;
+        message += `      • ${item.owner.firstName}\n`;
+      }
+
+      if (item.ownerId) {
+        message += `   👤 ผู้ส่ง:`;
+        message += `      • ${item.approver.firstName}\n`;
       }
     });
 
@@ -233,17 +237,22 @@ export async function getWorkorders(req, res, next) {
         workorderItems: {
           include: {
             config: true,
-            assignedTo: {
-              include: {
-                user: {
-                  select: {
-                    id: true,
-                    email: true,
-                    firstName: true,
-                    lastName: true,
-                    avatar: true,
-                  },
-                },
+            owner: {
+              select: {
+                id: true,
+                email: true,
+                firstName: true,
+                lastName: true,
+                avatar: true,
+              },
+            },
+            approver: {
+              select: {
+                id: true,
+                email: true,
+                firstName: true,
+                lastName: true,
+                avatar: true,
               },
             },
             attachments: true,
@@ -282,17 +291,22 @@ export const getWorkorderById = async (req, res, next) => {
       include: {
         workorderItems: {
           include: {
-            assignedTo: {
-              include: {
-                user: {
-                  select: {
-                    id: true,
-                    email: true,
-                    firstName: true,
-                    lastName: true,
-                    avatar: true,
-                  },
-                },
+            owner: {
+              select: {
+                id: true,
+                email: true,
+                firstName: true,
+                lastName: true,
+                avatar: true,
+              },
+            },
+            approver: {
+              select: {
+                id: true,
+                email: true,
+                firstName: true,
+                lastName: true,
+                avatar: true,
               },
             },
             attachments: true,
@@ -322,7 +336,8 @@ export const updateWorkorder = async (req, res, next) => {
     let invalid = workorderItems.every(
       (item) =>
         item.detail &&
-        item.assignedTo.length > 0 &&
+        item.ownerId &&
+        item.approveId &&
         item.startDate &&
         item.endDate
     );
@@ -331,7 +346,7 @@ export const updateWorkorder = async (req, res, next) => {
       return next(
         createError(
           400,
-          "กรุณากรอกข้อมูล สิ่งที่ต้องแจ้งซ่อม, Assign User, วันที่เริ่มต้น-สิ้นสุด และสถานที่ ให้ครบถ้วน"
+          "กรุณากรอกข้อมูล สิ่งที่ต้องแจ้งซ่อม, ผู้อนุมัติ, วันที่เริ่มต้น-สิ้นสุด และสถานที่ ให้ครบถ้วน"
         )
       );
     }
@@ -359,13 +374,15 @@ export const updateWorkorder = async (req, res, next) => {
               startDate: item.startDate ? new Date(item.startDate) : null,
               endDate: item.endDate ? new Date(item.endDate) : null,
               configId: item.configId,
-              ...(item.assignedTo && {
-                assignedTo: {
-                  create: item.assignedTo.map((userId) => ({
-                    userId,
-                  })),
-                },
-              }),
+              approveId: item.approveId,
+              ownerId: item.ownerId,
+              // ...(item.assignedTo && {
+              //   assignedTo: {
+              //     create: item.assignedTo.map((userId) => ({
+              //       userId,
+              //     })),
+              //   },
+              // }),
               statusApproveId: item.statusApproveId || 1,
               ...(item.attachments && {
                 attachments: {
@@ -381,9 +398,22 @@ export const updateWorkorder = async (req, res, next) => {
       include: {
         workorderItems: {
           include: {
-            assignedTo: {
-              include: {
-                user: true,
+            owner: {
+              select: {
+                id: true,
+                email: true,
+                firstName: true,
+                lastName: true,
+                avatar: true,
+              },
+            },
+            approver: {
+              select: {
+                id: true,
+                email: true,
+                firstName: true,
+                lastName: true,
+                avatar: true,
               },
             },
             config: true,
