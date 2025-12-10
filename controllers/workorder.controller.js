@@ -166,12 +166,12 @@ export async function createWorkorder(req, res, next) {
 
       if (item.approveId) {
         message += `   👤 ผู้อนุมัติ:`;
-        message += `      • ${item.owner.firstName}\n`;
+        message += `      • ${item.approver.firstName}\n`;
       }
 
       if (item.ownerId) {
         message += `   👤 ผู้ส่ง:`;
-        message += `      • ${item.approver.firstName}\n`;
+        message += `      • ${item.owner.firstName}\n`;
       }
     });
 
