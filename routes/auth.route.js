@@ -7,6 +7,7 @@ import {
   createStatusApproveId,
   createWorkorder,
   deleteWorkorder,
+  getSubWorkorder,
   getWorkorderById,
   getWorkorders,
   register,
@@ -53,6 +54,7 @@ router.put("/workorder/update/:id", verifyToken, updateWorkorder); //
 router.delete("/workorder/delete/:id", verifyToken, deleteWorkorder); //
 router.get("/workorder/:id", verifyToken, getWorkorderById); //
 router.get("/workorder", verifyToken, getWorkorders); //
+router.get("/workorderItem", verifyToken, getSubWorkorder); //
 router.put(
   "/workorder/updateStatusWorkorderItem/:id",
   updateStatusWorkorderItem

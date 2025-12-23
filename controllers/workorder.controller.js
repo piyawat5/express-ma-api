@@ -282,6 +282,69 @@ export async function getWorkorders(req, res, next) {
   }
 }
 
+export async function getSubWorkorder(req, res, next) {
+  try {
+    const {
+      page = "1",
+      size = "10",
+      sortBy = "createdAt",
+      sortOrder = "desc",
+      statusApproveId,
+    } = req.query;
+    const pageNum = parseInt(page);
+    const sizeNum = parseInt(size);
+    const skip = (pageNum - 1) * sizeNum;
+    // Get total count for pagination
+    const total = await prisma.workorderItem.count();
+    // Get workorders with relations
+    const workorderItems = await prisma.workorderItem.findMany({
+      where: {
+        ...(statusApproveId && { statusApproveId: parseInt(statusApproveId) }),
+      },
+      include: {
+        config: true,
+        owner: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+            avatar: true,
+          },
+        },
+        approver: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+            avatar: true,
+          },
+        },
+        attachments: true,
+        StatusApprove: true,
+      },
+      skip,
+      take: sizeNum,
+      orderBy: {
+        [sortBy]: sortOrder.toLowerCase() === "asc" ? "asc" : "desc",
+      },
+    });
+    return res.json({
+      success: true,
+      data: workorderItems,
+      pagination: {
+        page: pageNum,
+        size: sizeNum,
+        total,
+        totalPages: Math.ceil(total / sizeNum),
+      },
+    });
+  } catch (error) {
+    next(createError(500, error));
+  }
+}
+
 export const getWorkorderById = async (req, res, next) => {
   try {
     const { id } = req.params;
