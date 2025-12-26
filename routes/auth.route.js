@@ -13,6 +13,7 @@ import {
   register,
   updateStatusWorkorderItem,
   updateWorkorder,
+  repairNotify,
 } from "../controllers/workorder.controller.js";
 
 import {
@@ -60,6 +61,7 @@ router.put(
   updateStatusWorkorderItem
 ); //
 router.post("/workorder/statusApprove", createStatusApproveId); //
+router.get("/repairNotification", repairNotify);
 
 // ------------- config --------------
 router.get("/config/type", verifyToken, getConfigTypes); //

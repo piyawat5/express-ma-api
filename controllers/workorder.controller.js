@@ -608,6 +608,45 @@ export const createStatusApproveId = async (req, res, next) => {
   }
 };
 
+export const repairNotify = async (req, res, next) => {
+  try {
+    const workOrderItems = await prisma.workorderItem.findMany({
+      where: {
+        statusApproveId: 2, // Approved
+      },
+      include: {
+        owner: true,
+        approver: true,
+        config: true,
+      },
+    });
+
+    if (workOrderItems.length === 0) {
+      return res.json({
+        success: true,
+        message: "ไม่มีรายการรอดำเนินการ",
+      });
+    }
+
+    let message = "⚙ แจ้งเตือนจากระบบ MA\n\n";
+    message += "รายการดังต่อไปนี้ยังไม่ได้ดำเนินการซ่อมแซม\n\n";
+    workOrderItems.forEach((item, index) => {
+      message += `#Order ${index}\n`;
+      message += `ชื่อรายการ:\n${item.config.name}\n`;
+      message += `ผู้รับผิดชอบ:\nคุณ (${item.approver.firstName})\n`;
+      message += `สถานที่:\n${item.detail}\n\n`;
+    });
+    // ส่งข้อความแจ้งเตือนผ่าน LINE Notify
+    await sendLineMessage(message);
+    res.json({
+      success: true,
+      message: "ส่งการแจ้งเตือนรายการรอดำเนินการสำเร็จ",
+    });
+  } catch (error) {
+    next(createError(500, error));
+  }
+};
+
 export const test = async (req, res, next) => {
   try {
     res.json({ message: "Test controller is working!" });
