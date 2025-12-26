@@ -631,11 +631,14 @@ export const repairNotify = async (req, res, next) => {
     let message = "⚙ แจ้งเตือนจากระบบ MA\n\n";
     message += "รายการดังต่อไปนี้ยังไม่ได้ดำเนินการซ่อมแซม\n\n";
     workOrderItems.forEach((item, index) => {
-      message += `#Order ${index}\n`;
-      message += `ชื่อรายการ:\n${item.config.name}\n`;
-      message += `ผู้รับผิดชอบ:\nคุณ (${item.approver.firstName})\n`;
-      message += `สถานที่:\n${item.detail}\n\n`;
+      message += `#Order ${index + 1}\n`;
+      message += `ชื่อรายการ:\n➤${item.config.name}\n`;
+      message += `ผู้รับผิดชอบ:\n➤คุณ (${item.approver.firstName})\n`;
+      message += `สถานที่:\n➤${item.detail}\n\n`;
     });
+
+    message += "กรุณาดำเนินการซ่อมแซมโดยเร็ว\n";
+    message += "𓆝 𓆟 𓆞 𓆝 𓆟 𓆝 𓆟 𓆞";
     // ส่งข้อความแจ้งเตือนผ่าน LINE Notify
     await sendLineMessage(message);
     res.json({
