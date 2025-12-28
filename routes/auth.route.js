@@ -40,14 +40,43 @@ import {
   login,
 } from "../controllers/authCookie.controller.js";
 
+import {
+  uploadImage,
+  uploadMultipleImages,
+} from "../controllers/attachFile.controller.js";
+
+import multer from "multer";
+
 import verifyToken from "../config/verify.js";
 // import { preLogUserAction } from "../controllers/logUser.controller.js";
 // import { registerSchema, loginSchema, validate } from "../utils/validator.js";
+
+// ใช้ memory storage สำหรับ multer (เก็บไว้ใน memory ก่อนส่งไป Cloudinary)
+const storage = multer.memoryStorage();
+const upload = multer({
+  storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // จำกัด 5MB
+  },
+  fileFilter: (req, file, cb) => {
+    console.log("01");
+    // ยอมรับเฉพาะไฟล์รูปภาพ
+    if (file.mimetype.startsWith("image/")) {
+      cb(null, true);
+    } else {
+      cb(new Error("อนุญาตเฉพาะไฟล์รูปภาพเท่านั้น"));
+    }
+  },
+});
 
 const router = express.Router();
 
 //------------- auth --------------
 router.get("/users", verifyToken, getUsers); //
+
+// ------------- upload --------------
+router.post("/single", upload.single("image"), uploadImage);
+router.post("/multiple", upload.array("images", 10), uploadMultipleImages);
 
 // ------------- workorder --------------
 router.post("/workorder/create", verifyToken, createWorkorder); //
