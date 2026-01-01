@@ -556,7 +556,13 @@ export const updateStatusWorkorderItem = async (req, res, next) => {
       message += `📌 รายละเอียด: ${existingWorkorderItem.detail}\n`;
       message += `👤 ผู้แจ้งเรื่อง: ${existingWorkorderItem.owner.firstName}\n`;
       message += `👤 ผู้ดำเนินการ: ${existingWorkorderItem.approver.firstName}\n`;
-      message += `เวลาดำเนินการแล้วเสร็จ: ${existingWorkorderItem.updatedAt}\n`;
+      const finishedAt = new Date(
+        existingWorkorderItem.updatedAt
+      ).toLocaleString("th-TH", {
+        dateStyle: "long",
+        timeStyle: "medium",
+      });
+      message += `เวลาดำเนินการแล้วเสร็จ: ${finishedAt}\n`;
       await sendLineMessage(message);
     }
     return res.json({
