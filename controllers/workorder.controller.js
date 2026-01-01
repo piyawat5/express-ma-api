@@ -530,6 +530,11 @@ export const updateStatusWorkorderItem = async (req, res, next) => {
     // Check if workorder item exists
     const existingWorkorderItem = await prisma.workorderItem.findUnique({
       where: { id },
+      include: {
+        owner: true,
+        approver: true,
+        config: true,
+      },
     });
     if (!existingWorkorderItem) {
       return next(createError(404, "ไม่พบ workorder item"));
@@ -542,6 +547,18 @@ export const updateStatusWorkorderItem = async (req, res, next) => {
         ...(comment ? { comment: comment } : {}),
       },
     });
+
+    if (statusApproveId === 4) {
+      // ส่งไลน์เมื่อสถานะเป็น "อนุมัติแล้ว"
+      let message = `✅ ดำเนินการซ่อมแซมเรียบร้อย!\n\n`;
+      message += `เลข Work Order: ${existingWorkorderItem.id}\n`;
+      message += `ชื่อรายการ: ${existingWorkorderItem.config.name}\n`;
+      message += `📌 รายละเอียด: ${existingWorkorderItem.detail}\n`;
+      message += `👤 ผู้แจ้งเรื่อง: ${existingWorkorderItem.owner.firstName}\n`;
+      message += `👤 ผู้ดำเนินการ: ${existingWorkorderItem.approver.firstName}\n`;
+      message += `เวลาดำเนินการแล้วเสร็จ: ${existingWorkorderItem.updatedAt}\n`;
+      await sendLineMessage(message);
+    }
     return res.json({
       success: true,
       message: "อัพเดทสถานะ workorder item สำเร็จ",
