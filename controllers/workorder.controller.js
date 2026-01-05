@@ -554,7 +554,11 @@ export const updateStatusWorkorderItem = async (req, res, next) => {
       message += `เลข Work Order: ${existingWorkorderItem.id}\n`;
       message += `ชื่อรายการ: ${existingWorkorderItem.config.name}\n`;
       message += `📌 รายละเอียด: ${existingWorkorderItem.detail}\n`;
-      message += `👤 ผู้แจ้งเรื่อง: ${existingWorkorderItem.owner.firstName}\n`;
+      message += `👤 ผู้แจ้งเรื่อง: ${
+        existingWorkorderItem.owner
+          ? existingWorkorderItem.owner?.firstName
+          : "-"
+      }\n`;
       message += `👤 ผู้ดำเนินการ: ${existingWorkorderItem.approver.firstName}\n`;
       const finishedAt = new Date(
         existingWorkorderItem.updatedAt

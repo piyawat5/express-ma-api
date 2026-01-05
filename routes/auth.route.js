@@ -75,6 +75,7 @@ const router = express.Router();
 router.get("/users", verifyToken, getUsers); //
 
 // ------------- upload --------------
+//TODO: verify
 router.post("/single", upload.single("image"), uploadImage);
 router.post("/multiple", upload.array("images", 10), uploadMultipleImages);
 
